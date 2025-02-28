@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hangman</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    canvas {
+      border: 1px solid #333;
+      margin-bottom: 20px;
+      background-color: #fff;
+    }
+    .word {
+      font-size: 24px;
+      letter-spacing: 10px;
+      margin-bottom: 20px;
+    }
+    .alphabet button {
+      margin: 3px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .alphabet button:disabled {
+      background-color: #ddd;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hangman</h1>
+  <canvas id="hangman" width="200" height="250"></canvas>
+  <div class="word" id="wordDisplay"></div>
+  <div class="alphabet" id="alphabet"></div>
+  
+  <script>
+    const words = ["apple", "banana", "cat", "dog", "elephant", "fish", "grape", "hat", "ice", "jelly",
+"kite", "lemon", "moon", "nest", "orange", "pencil", "queen", "rabbit", "sun", "tree",
+"umbrella", "violin", "water", "xylophone", "yogurt", "zebra", "air", "ball", "car", "desk",
+"egg", "fork", "goat", "house", "ink", "jam", "key", "lamp", "mouse", "net",
+"ocean", "pizza", "quiet", "rose", "star", "table", "under", "vase", "window", "x-ray",
+"yellow", "zoo", "ant", "bread", "cloud", "duck", "ear", "flower", "guitar", "hill",
+"iron", "juice", "kangaroo", "light", "mirror", "note", "octopus", "peach", "quilt", "road",
+"shell", "tomato", "up", "valley", "whale", "xenon", "yawn", "zero", "anchor", "breeze",
+"candle", "daisy", "echo", "feather", "gold", "honey", "island", "jigsaw", "koala", "leaves",
+"marble", "noodle", "orbit", "parrot", "quokka", "rain", "sugar", "tiger", "unicorn", "volcano"];
+    let selectedWord = words[Math.floor(Math.random() * words.length)];
+    let wrongGuesses = 0;
+    const maxWrong = 6;
+    let guessedLetters = [];
+    
+    const wordDisplay = document.getElementById("wordDisplay");
+    const alphabetDiv = document.getElementById("alphabet");
+    const canvas = document.getElementById("hangman");
+    const ctx = canvas.getContext("2d");
+    
+    // base
+    function drawGallows() {
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      // base
+      ctx.moveTo(10, canvas.height - 10);
+      ctx.lineTo(190, canvas.height - 10);
+      // vertical pole
+      ctx.moveTo(50, canvas.height - 10);
+      ctx.lineTo(50, 10);
+      // top beam
+      ctx.lineTo(150, 10);
+      // rope
+      ctx.lineTo(150, 30);
+      ctx.stroke();
+    }
+    
+    // Hangman bodyy
+    function drawHangman() {
+      if (wrongGuesses === 1) {
+        // Head
+        ctx.beginPath();
+        ctx.arc(150, 45, 15, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (wrongGuesses === 2) {
+        // Body
+        ctx.beginPath();
+        ctx.moveTo(150, 60);
+        ctx.lineTo(150, 110);
+        ctx.stroke();
+      } else if (wrongGuesses === 3) {
+        // Left arm
+        ctx.beginPath();
+        ctx.moveTo(150, 70);
+        ctx.lineTo(130, 90);
+        ctx.stroke();
+      } else if (wrongGuesses === 4) {
+        // Right arm
+        ctx.beginPath();
+        ctx.moveTo(150, 70);
+        ctx.lineTo(170, 90);
+        ctx.stroke();
+      } else if (wrongGuesses === 5) {
+        // Left leg
+        ctx.beginPath();
+        ctx.moveTo(150, 110);
+        ctx.lineTo(130, 140);
+        ctx.stroke();
+      } else if (wrongGuesses === 6) {
+        // Right leg
+        ctx.beginPath();
+        ctx.moveTo(150, 110);
+        ctx.lineTo(170, 140);
+        ctx.stroke();
+      }
+    }
+    function updateWordDisplay() {
+      let display = "";
+      for (let letter of selectedWord) {
+        if (guessedLetters.includes(letter)) {
+          display += letter + " ";
+        } else {
+          display += "_ ";
+        }
+      }
+      wordDisplay.textContent = display.trim();
+    }
+    function checkWin() {
+      let won = true;
+      for (let letter of selectedWord) {
+        if (!guessedLetters.includes(letter)) {
+          won = false;
+          break;
+        }
+      }
+      if (won) {
+        setTimeout(() => alert("Congratulations! You won!"), 100);
+      }
+    }
+    function checkLose() {
+      if (wrongGuesses >= maxWrong) {
+        setTimeout(() => alert("Game Over! The word was: " + selectedWord), 100);
+      }
+    }
+    function handleGuess(letter, button) {
+      button.disabled = true;
+      if (selectedWord.includes(letter)) {
+        guessedLetters.push(letter);
+        updateWordDisplay();
+        checkWin();
+      } else {
+        wrongGuesses++;
+        drawHangman();
+        checkLose();
+      }
+    }
+    function createAlphabetButtons() {
+      const alphabets = "abcdefghijklmnopqrstuvwxyz";
+      for (let letter of alphabets) {
+        const button = document.createElement("button");
+        button.textContent = letter;
+        button.addEventListener("click", () => handleGuess(letter, button));
+        alphabetDiv.appendChild(button);
+      }
+    }
+    drawGallows();
+    updateWordDisplay();
+    createAlphabetButtons();
+  </script>
+</body>
+</html>
